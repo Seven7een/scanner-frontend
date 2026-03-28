@@ -1,0 +1,58 @@
+/* Custom styles beyond Tailwind */
+
+.nav-btn {
+    color: #94a3b8;
+}
+.nav-btn:hover {
+    background-color: #334155;
+    color: #e2e8f0;
+}
+.nav-btn.active {
+    background-color: #1d4ed8;
+    color: #ffffff;
+}
+
+/* Severity badges */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.badge-critical { background-color: #7f1d1d; color: #fca5a5; }
+.badge-high { background-color: #7c2d12; color: #fdba74; }
+.badge-medium { background-color: #713f12; color: #fde047; }
+.badge-low { background-color: #1e3a5f; color: #93c5fd; }
+
+/* Status badges */
+.status-pending { color: #fbbf24; }
+.status-running { color: #60a5fa; }
+.status-completed { color: #34d399; }
+.status-failed { color: #f87171; }
+
+/* Finding card expand animation */
+.finding-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+.finding-details.expanded {
+    max-height: 500px;
+}
+
+/* Snippet code block */
+.snippet {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #e2e8f0;
+}

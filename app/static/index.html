@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repo Security Scanner</title>
+    <meta name="description" content="Web UI for repository security scanning">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        surface: '#1e293b',
+                        card: '#334155',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="dark bg-slate-900 text-gray-100 min-h-screen">
+    <!-- Auth Gate -->
+    <div id="auth-gate" class="flex items-center justify-center min-h-screen">
+        <div class="bg-surface rounded-xl p-8 shadow-2xl w-full max-w-sm mx-4">
+            <h1 class="text-2xl font-bold text-center mb-6">🔒 Scanner</h1>
+            <p class="text-gray-400 text-sm text-center mb-4">Enter your API key to continue</p>
+            <input type="password" id="api-key-input" placeholder="API Key"
+                class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+            <button onclick="App.authenticate()" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
+                Connect
+            </button>
+            <p id="auth-error" class="text-red-400 text-sm text-center mt-3 hidden"></p>
+        </div>
+    </div>
+
+    <!-- Main App (hidden until authenticated) -->
+    <div id="app" class="hidden">
+        <!-- Nav -->
+        <nav class="bg-surface border-b border-slate-700 sticky top-0 z-50">
+            <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+                <h1 class="text-lg font-bold">🔒 Repo Scanner</h1>
+                <div class="flex gap-1">
+                    <button onclick="App.showView('scan')" data-nav="scan"
+                        class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium transition">New Scan</button>
+                    <button onclick="App.showView('history')" data-nav="history"
+                        class="nav-btn px-3 py-1.5 rounded-lg text-sm font-medium transition">History</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- New Scan View -->
+        <div id="view-scan" class="view max-w-2xl mx-auto px-4 py-6">
+            <div class="bg-surface rounded-xl p-6 shadow-lg">
+                <h2 class="text-xl font-semibold mb-4">New Security Scan</h2>
+                <form id="scan-form" onsubmit="App.submitScan(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">GitHub Usernames</label>
+                        <input type="text" id="github-users" placeholder="user1, user2"
+                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-gray-500 text-xs mt-1">Comma-separated usernames</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">GitLab Usernames</label>
+                        <input type="text" id="gitlab-users" placeholder="user1, user2 (optional)"
+                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Repo URLs</label>
+                        <textarea id="repo-urls" rows="3" placeholder="https://github.com/user/repo&#10;https://gitlab.com/user/repo"
+                            class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-mono resize-y"></textarea>
+                        <p class="text-gray-500 text-xs mt-1">One URL per line, or comma-separated. Can be used alone or with usernames above.</p>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Scan Type</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="scan-type" value="gitleaks" checked
+                                    class="text-blue-500 focus:ring-blue-500 bg-slate-800 border-slate-600">
+                                <span class="text-sm">Gitleaks</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="scan-type" value="ai"
+                                    class="text-blue-500 focus:ring-blue-500 bg-slate-800 border-slate-600">
+                                <span class="text-sm">AI</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="scan-type" value="all"
+                                    class="text-blue-500 focus:ring-blue-500 bg-slate-800 border-slate-600">
+                                <span class="text-sm">Both</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" id="scan-btn"
+                        class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition">
+                        🔍 Start Scan
+                    </button>
+                </form>
+            </div>
+
+            <!-- Scan Progress (hidden by default) -->
+            <div id="scan-progress" class="hidden mt-6 bg-surface rounded-xl p-6 shadow-lg">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                    <span id="scan-status-text" class="text-sm font-medium">Starting scan...</span>
+                </div>
+                <div class="w-full bg-slate-700 rounded-full h-2">
+                    <div id="scan-progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <!-- Scan Result (hidden by default) -->
+            <div id="scan-result" class="hidden mt-6"></div>
+        </div>
+
+        <!-- History View -->
+        <div id="view-history" class="view hidden max-w-4xl mx-auto px-4 py-6">
+            <h2 class="text-xl font-semibold mb-4">Scan History</h2>
+            <div id="history-list" class="space-y-3">
+                <p class="text-gray-400 text-sm">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Results View (drill-down) -->
+        <div id="view-results" class="view hidden max-w-5xl mx-auto px-4 py-6">
+            <button onclick="App.showView('history')" class="text-blue-400 hover:text-blue-300 text-sm mb-4 inline-block">← Back to History</button>
+            <div id="results-summary" class="mb-6"></div>
+            <!-- Filters -->
+            <div id="results-filters" class="flex flex-wrap gap-3 mb-4">
+                <select id="filter-severity" onchange="App.loadFindings()"
+                    class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                    <option value="">All Severities</option>
+                    <option value="critical">🔴 Critical</option>
+                    <option value="high">🟠 High</option>
+                    <option value="medium">🟡 Medium</option>
+                    <option value="low">🔵 Low</option>
+                </select>
+                <select id="filter-repo" onchange="App.loadFindings()"
+                    class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                    <option value="">All Repos</option>
+                </select>
+                <select id="filter-tool" onchange="App.loadFindings()"
+                    class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white">
+                    <option value="">All Tools</option>
+                    <option value="gitleaks">Gitleaks</option>
+                    <option value="ai">AI</option>
+                </select>
+            </div>
+            <div id="findings-list" class="space-y-2"></div>
+            <div id="findings-load-more" class="hidden mt-4 text-center">
+                <button onclick="App.loadMoreFindings()"
+                    class="bg-slate-700 hover:bg-slate-600 text-gray-300 px-6 py-2 rounded-lg text-sm font-medium transition">
+                    Load More
+                </button>
+                <p id="findings-count" class="text-gray-500 text-xs mt-2"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/sw.js');
+        }
+    </script>
+</body>
+</html>
