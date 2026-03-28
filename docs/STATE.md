@@ -4,7 +4,7 @@
 
 ### Done
 - [x] Project scaffolding (Forge conventions, .gitignore, .gitleaks.toml)
-- [x] Docker Compose setup (app + PostgreSQL)
+- [x] Docker Compose setup (app + PostgreSQL + Nginx TLS sidecar)
 - [x] Dockerfile with Docker CLI for subprocess scanning
 - [x] FastAPI backend with async lifespan
 - [x] SQLAlchemy models (Scan, Finding) with async PostgreSQL
@@ -20,13 +20,13 @@
 - [x] PWA frontend: dark theme, mobile-first, Tailwind CSS
 - [x] Service worker for offline shell caching
 - [x] Web manifest for PWA install
-- [x] **DinD volume mount fix** — host path for scanner output (Docker socket mounts are host-relative)
+- [x] DinD volume mount fix — host path for scanner output
+- [x] Repo URL scanning (manual repos via textarea input)
+- [x] Paginated findings (100 per page, "Load More")
+- [x] HTTPS via Nginx TLS sidecar (mkcert certs)
 
 ### Blocked / Future
-- [ ] Generate mkcert certs (requires mkcert on host)
-- [ ] Integration test with live scanner container
 - [ ] Per-user auth (currently single shared API key)
 - [ ] Scan scheduling / recurring scans
-- [ ] Repo URL scanning (manual repos, not just by username)
 - [ ] Export findings as CSV/PDF
 - [ ] Webhook notifications on scan completion
